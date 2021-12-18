@@ -1,5 +1,5 @@
 {
-  "name": "abraham/twitteroauth",
+  "name": "swegio/twitteroauth",
   "type": "library",
   "description": "The most popular PHP library for use with the Twitter OAuth REST API.",
   "keywords": [
@@ -27,6 +27,10 @@
   },
   "repositories": [
     {
+      "type": "vcs",
+      "url": "https://github.com/swegio/twitteroauth"
+    },
+    {
       "type": "git",
       "url": "https://github.com/morozov/php-vcr"
     },
@@ -38,7 +42,8 @@
   "require": {
     "php": "^7.2 || ^7.3 || ^7.4 || ^8.0",
     "ext-curl": "*",
-    "composer/ca-bundle": "^1.2"
+    "composer/ca-bundle": "^1.2",
+    "abraham/twitteroauth":"dev-main"
   },
   "require-dev": {
     "phpunit/phpunit": "^8",
