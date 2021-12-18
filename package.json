@@ -1,5 +1,5 @@
 {
-  "name": "twitteroauth",
+  "name": "sweg-twitteroauth",
   "version": "0.0.0",
   "description": "The most popular forked-PHP library for use with the Twitter OAuth REST API.",
   "license": "MIT",
