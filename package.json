@@ -1,14 +1,14 @@
 {
   "name": "twitteroauth",
   "version": "0.0.0",
-  "description": "The most popular PHP library for use with the Twitter OAuth REST API.",
+  "description": "The most popular forked-PHP library for use with the Twitter OAuth REST API.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abraham/twitteroauth.git"
+    "url": "git+https://github.com/swegio/twitteroauth.git"
   },
-  "author": "Abraham Williams <abraham@abrah.am>",
-  "homepage": "https://github.com/abraham/twitteroauth#readme",
+  "author": "Jason Chow <fdc21d52@opayq.com>",
+  "homepage": "https://github.com/swegio/twitteroauth#readme",
   "bugs": {
     "url": "https://github.com/abraham/twitteroauth/issues"
   },
