@@ -315,7 +315,35 @@ class TwitterOAuth extends Config
             false,
         );
     }
-
+    /**
+     * Convert a URL to media to upload.twitter.com.
+     *
+     * @param string $path
+     * @param array  $parameters
+     *
+     * @return array|object
+     */
+    public function shipit($path, $parameters = []) {
+        return $this->uploadMediaNotStored($path, $parameters);
+    /**
+     * Private method to convert a URL to media to upload.twitter.com.
+     *
+     * @param string $path
+     * @param array  $parameters
+     * @param boolean  $chunked
+     *
+     * @return array|object
+     */
+    }
+    private function uploadMediaNotStored($path, array $parameters)
+    {
+        if (! is_readable($parameters['media']) &&
+            ($file = file_get_contents($parameters['media'])) === false) {
+            throw new \InvalidArgumentException('You must supply a readable file');
+        }
+        $parameters['media'] = base64_encode($file);
+        return $this->http('POST', self::UPLOAD_HOST, $path, $parameters);
+    }
     /**
      * Private method to upload media (not chunked) to upload.twitter.com.
      *
