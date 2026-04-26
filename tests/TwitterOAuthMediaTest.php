@@ -10,28 +10,32 @@ namespace Abraham\TwitterOAuth\Test;
 
 use PHPUnit\Framework\TestCase;
 use Abraham\TwitterOAuth\TwitterOAuth;
+use Abraham\TwitterOAuth\MockHttpClient;
 
 class TwitterOAuthMediaTest extends TestCase
 {
     /** @var TwitterOAuth */
     protected $twitter;
+    /** @var MockHttpClient */
+    protected $mockClient;
 
     protected function setUp(): void
     {
+        $this->mockClient = new MockHttpClient();
         $this->twitter = new TwitterOAuth(
             CONSUMER_KEY,
             CONSUMER_SECRET,
             ACCESS_TOKEN,
             ACCESS_TOKEN_SECRET,
+            $this->mockClient,
         );
+        $this->twitter->setApiVersion('1.1');
         $this->userId = explode('-', ACCESS_TOKEN)[0];
     }
 
-    /**
-     * @vcr testPostStatusesUpdateWithMedia.json
-     */
     public function testPostStatusesUpdateWithMedia()
     {
+        $this->mockClient->useFixture('testPostStatusesUpdateWithMedia');
         $this->twitter->setTimeouts(60, 60);
         // Image source https://www.flickr.com/photos/titrans/8548825587/
         $file_path = __DIR__ . '/kitten.jpg';
@@ -39,7 +43,7 @@ class TwitterOAuthMediaTest extends TestCase
             'media' => $file_path,
         ]);
         $this->assertEquals(200, $this->twitter->getLastHttpCode());
-        $this->assertObjectHasAttribute('media_id_string', $result);
+        $this->assertObjectHasProperty('media_id_string', $result);
         $parameters = [
             'status' => 'Hello World ' . MOCK_TIME,
             'media_ids' => $result->media_id_string,
@@ -50,11 +54,11 @@ class TwitterOAuthMediaTest extends TestCase
         return $result;
     }
 
-    /**
-     * @vcr testPostStatusUpdateWithInvalidMediaThrowsException.json
-     */
     public function testPostStatusUpdateWithInvalidMediaThrowsException()
     {
+        $this->mockClient->useFixture(
+            'testPostStatusUpdateWithInvalidMediaThrowsException',
+        );
         $this->expectException(\InvalidArgumentException::class);
         $file_path = __DIR__ . '/12345678900987654321.jpg';
         $this->assertFalse(\is_readable($file_path));
@@ -63,21 +67,19 @@ class TwitterOAuthMediaTest extends TestCase
         ]);
     }
 
-    /**
-     * @vcr testPostStatusesUpdateWithMediaChunked.json
-     */
     public function testPostStatusesUpdateWithMediaChunked()
     {
+        $this->mockClient->useFixture('testPostStatusesUpdateWithMediaChunked');
         $this->twitter->setTimeouts(60, 30);
         // Video source http://www.sample-videos.com/
         $file_path = __DIR__ . '/video.mp4';
         $result = $this->twitter->upload(
             'media/upload',
             ['media' => $file_path, 'media_type' => 'video/mp4'],
-            true,
+            ['chunkedUpload' => true],
         );
         $this->assertEquals(201, $this->twitter->getLastHttpCode());
-        $this->assertObjectHasAttribute('media_id_string', $result);
+        $this->assertObjectHasProperty('media_id_string', $result);
         $parameters = [
             'status' => 'Hello World ' . MOCK_TIME,
             'media_ids' => $result->media_id_string,
@@ -86,5 +88,29 @@ class TwitterOAuthMediaTest extends TestCase
         $this->assertEquals(200, $this->twitter->getLastHttpCode());
         $result = $this->twitter->post('statuses/destroy/' . $result->id_str);
         return $result;
+    }
+
+    public function testPostStatusesUpdateWithMediaChunkedException()
+    {
+        $this->mockClient->useFixture(
+            'testPostStatusesUpdateWithMediaChunkedException',
+        );
+        $caught = false;
+        try {
+            // Video source http://www.sample-videos.com/
+            $file_path = __DIR__ . '/video.mp4';
+            $result = $this->twitter->upload(
+                'media/upload',
+                ['media' => $file_path, 'media_type' => 'video/mp4'],
+                ['chunkedUpload' => true],
+            );
+        } catch (\Abraham\TwitterOAuth\TwitterOAuthException $e) {
+            $this->assertStringContainsString(
+                'Failed to process media.',
+                $e->getMessage(),
+            );
+            $caught = true;
+        }
+        assert($caught);
     }
 }
